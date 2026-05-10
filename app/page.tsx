@@ -42,7 +42,7 @@ export default function Page() {
       )}
 
       <footer className="mt-12 text-center text-xs text-zinc-600">
-        Gemini · Qdrant · LangChain · Next.js
+        Groq · Hugging Face · Qdrant · LangChain · Next.js
       </footer>
     </main>
   );

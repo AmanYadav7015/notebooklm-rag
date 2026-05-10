@@ -25,8 +25,8 @@ A self-built version of Google NotebookLM. Upload a PDF or text file, then chat 
 | API | Next.js Route Handlers (Node runtime) |
 | PDF loading | LangChain `PDFLoader` (page-aware) |
 | Chunking | `RecursiveCharacterTextSplitter` (1000 / 200) |
-| Embeddings | Google Gemini `embedding-001` |
-| LLM | Google Gemini `gemini-2.0-flash` |
+| Embeddings | Hugging Face Inference API (`sentence-transformers/all-MiniLM-L6-v2`) |
+| LLM | Groq (`llama-3.1-8b-instant`) |
 | Vector DB | Qdrant Cloud |
 | Hosting | Vercel |
 
@@ -84,23 +84,24 @@ git clone <your-repo>
 cd notebooklm-rag
 npm install
 cp .env.example .env.local
-# fill in GOOGLE_API_KEY, QDRANT_URL, QDRANT_API_KEY
+# fill in GROQ_API_KEY, QDRANT_URL, QDRANT_API_KEY
 npm run dev
 ```
 
 Visit http://localhost:3000.
 
-### Getting the keys (free)
+### Getting the keys (all free)
 
-- **Gemini API key** → https://aistudio.google.com/apikey (Google account, free tier).
-- **Qdrant Cloud** → https://cloud.qdrant.io → create a free cluster → copy `URL` and `API key`. The free tier is enough for this assignment.
+- **Groq API key** (LLM) → https://console.groq.com/keys → sign in with Google → "Create API Key".
+- **Hugging Face token** (embeddings) → https://huggingface.co/settings/tokens → "Create new token" → type "Read".
+- **Qdrant Cloud** → https://cloud.qdrant.io → create a free cluster → copy `URL` (with `:6333`) and `API key`.
 
 ## Deploy to Vercel
 
 1. Push this folder to a public GitHub repo.
 2. Go to https://vercel.com/new, import the repo.
 3. Under **Settings → Environment Variables**, add:
-   - `GOOGLE_API_KEY`
+   - `GROQ_API_KEY`
    - `QDRANT_URL`
    - `QDRANT_API_KEY`
    - (optional) `QDRANT_COLLECTION` (defaults to `notebooklm`)
