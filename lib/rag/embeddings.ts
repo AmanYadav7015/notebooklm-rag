@@ -1,18 +1,16 @@
-import { pipeline, type FeatureExtractionPipeline } from "@huggingface/transformers";
+import { pipeline } from "@huggingface/transformers";
 import type { EmbeddingsInterface } from "@langchain/core/embeddings";
 
 /**
  * Local sentence-transformer embeddings — no API key, no network calls after
  * the model is downloaded once. Uses Xenova/all-MiniLM-L6-v2 (384-dim).
  */
-let _pipe: FeatureExtractionPipeline | null = null;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let _pipe: any = null;
 
-async function getPipe(): Promise<FeatureExtractionPipeline> {
+async function getPipe(): Promise<any> {
   if (_pipe) return _pipe;
-  _pipe = (await pipeline(
-    "feature-extraction",
-    "Xenova/all-MiniLM-L6-v2"
-  )) as FeatureExtractionPipeline;
+  _pipe = await pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2");
   return _pipe;
 }
 
