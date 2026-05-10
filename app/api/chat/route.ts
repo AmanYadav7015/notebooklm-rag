@@ -6,7 +6,9 @@ export const runtime = "nodejs";
 export const maxDuration = 60;
 
 export async function POST(req: NextRequest) {
+  let stage = "init";
   try {
+    stage = "parse-body";
     const { question, docId } = await req.json();
     if (!question || !docId) {
       return NextResponse.json(
@@ -15,6 +17,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    stage = "vector-search";
     const chunks = await similaritySearch(question, docId, 4);
     if (chunks.length === 0) {
       return NextResponse.json({
@@ -23,10 +26,11 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    stage = "llm-answer";
     const { answer, citations } = await answerWithContext(question, chunks);
     return NextResponse.json({ answer, citations });
   } catch (e: any) {
-    const detail = e?.message || String(e);
+    const detail = `[${stage}] ${e?.message || String(e)}`;
     console.error("chat error", detail, e);
     return NextResponse.json({ error: detail }, { status: 500 });
   }
