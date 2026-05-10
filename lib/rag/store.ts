@@ -1,14 +1,11 @@
-import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
 import { QdrantVectorStore } from "@langchain/qdrant";
 import type { Document } from "@langchain/core/documents";
+import { LocalEmbeddings } from "./embeddings";
 
-const COLLECTION = process.env.QDRANT_COLLECTION || "notebooklm";
+const COLLECTION = process.env.QDRANT_COLLECTION || "notebooklm_minilm";
 
 export function getEmbeddings() {
-  return new GoogleGenerativeAIEmbeddings({
-    apiKey: process.env.GOOGLE_API_KEY!,
-    model: "text-embedding-004",
-  });
+  return new LocalEmbeddings();
 }
 
 /**

@@ -25,7 +25,7 @@ A self-built version of Google NotebookLM. Upload a PDF or text file, then chat 
 | API | Next.js Route Handlers (Node runtime) |
 | PDF loading | LangChain `PDFLoader` (page-aware) |
 | Chunking | `RecursiveCharacterTextSplitter` (1000 / 200) |
-| Embeddings | Google Gemini `text-embedding-004` |
+| Embeddings | Google Gemini `embedding-001` |
 | LLM | Google Gemini `gemini-2.0-flash` |
 | Vector DB | Qdrant Cloud |
 | Hosting | Vercel |
@@ -37,7 +37,7 @@ All providers used have a **free tier**, so the project can run end-to-end at $0
 ```
 upload → load (PDFLoader)
        → chunk (RecursiveCharacterTextSplitter, 1000/200)
-       → embed (Gemini text-embedding-004)
+       → embed (Gemini embedding-001)
        → store (Qdrant Cloud, tagged with docId)
                        │
 question → embed query │
@@ -116,7 +116,7 @@ That's the live link to submit.
 | Live project | Vercel URL above |
 | Ingestion | `lib/rag/load.ts` |
 | Chunking (documented) | `lib/rag/chunk.ts` + this README |
-| Embedding | `lib/rag/store.ts` (Gemini `text-embedding-004`) |
+| Embedding | `lib/rag/store.ts` (Gemini `embedding-001`) |
 | Vector DB | Qdrant Cloud (`lib/rag/store.ts`) |
 | Retrieval | `similaritySearch` filtered by `docId` |
 | Generation grounded in retrieved context | `lib/rag/answer.ts` system prompt + context-only rule |
