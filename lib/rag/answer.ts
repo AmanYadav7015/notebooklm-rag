@@ -6,15 +6,15 @@ export type Citation = {
   snippet: string;
 };
 
-const CHAT_URL = "https://router.huggingface.co/v1/chat/completions";
-const MODEL = "meta-llama/Llama-3.1-8B-Instruct:nebius";
+const CHAT_URL = "https://api.groq.com/openai/v1/chat/completions";
+const MODEL = "llama-3.1-8b-instant";
 
 export async function answerWithContext(
   question: string,
   chunks: Document[]
 ): Promise<{ answer: string; citations: Citation[] }> {
-  const token = process.env.HF_TOKEN;
-  if (!token) throw new Error("HF_TOKEN env var is not set");
+  const token = process.env.GROQ_API_KEY;
+  if (!token) throw new Error("GROQ_API_KEY env var is not set");
 
   const context = chunks
     .map((c, i) => {
@@ -58,7 +58,7 @@ ANSWER:`;
 
   if (!res.ok) {
     const body = await res.text();
-    throw new Error(`HF chat failed (${res.status}): ${body.slice(0, 300)}`);
+    throw new Error(`Groq chat failed (${res.status}): ${body.slice(0, 300)}`);
   }
 
   const json = (await res.json()) as {
