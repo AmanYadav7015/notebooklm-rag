@@ -33,7 +33,7 @@ export default function Chat({ docId, filename }: { docId: string; filename: str
       }
       setMessages((m) => [
         ...m,
-        { role: "assistant", content: json.answer, citations: json.citations },
+        { role: "assistant", content: json.answer ?? "", citations: json.citations },
       ]);
     } catch (e: any) {
       setMessages((m) => [...m, { role: "assistant", content: `Error: ${e.message}` }]);
