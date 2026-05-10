@@ -1,5 +1,9 @@
-import { pipeline } from "@huggingface/transformers";
+import { pipeline, env } from "@huggingface/transformers";
 import type { EmbeddingsInterface } from "@langchain/core/embeddings";
+
+// On Vercel/serverless, only /tmp is writable. Point the model cache there.
+env.cacheDir = "/tmp/transformers-cache";
+env.allowLocalModels = false;
 
 /**
  * Local sentence-transformer embeddings — no API key, no network calls after
