@@ -10,7 +10,8 @@ export function getEmbeddings() {
 
 /**
  * Add chunks to the shared collection. Collection is created on first use
- * via QdrantVectorStore.fromDocuments.
+ * via QdrantVectorStore.fromDocuments. We then ensure a payload index exists
+ * on metadata.docId so per-doc filtering works under Qdrant strict mode.
  */
 export async function addChunks(chunks: Document[]) {
   const embeddings = getEmbeddings();
@@ -19,6 +20,22 @@ export async function addChunks(chunks: Document[]) {
     apiKey: process.env.QDRANT_API_KEY,
     collectionName: COLLECTION,
   });
+  await ensureDocIdIndex();
+}
+
+async function ensureDocIdIndex() {
+  const url = `${process.env.QDRANT_URL}/collections/${COLLECTION}/index`;
+  await fetch(url, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      "api-key": process.env.QDRANT_API_KEY ?? "",
+    },
+    body: JSON.stringify({
+      field_name: "metadata.docId",
+      field_schema: "keyword",
+    }),
+  }).catch(() => {});
 }
 
 /**
