@@ -21,8 +21,16 @@ export default function Chat({ docId, filename }: { docId: string; filename: str
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ question: q, docId }),
       });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error || "Chat failed");
+      const text = await res.text();
+      let json: { answer?: string; citations?: Citation[]; error?: string } = {};
+      try {
+        json = JSON.parse(text);
+      } catch {
+        throw new Error(`HTTP ${res.status} ${res.statusText}: ${text.slice(0, 200)}`);
+      }
+      if (!res.ok) {
+        throw new Error(json.error || `HTTP ${res.status} ${res.statusText}`);
+      }
       setMessages((m) => [
         ...m,
         { role: "assistant", content: json.answer, citations: json.citations },

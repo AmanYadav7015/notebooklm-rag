@@ -26,10 +26,8 @@ export async function POST(req: NextRequest) {
     const { answer, citations } = await answerWithContext(question, chunks);
     return NextResponse.json({ answer, citations });
   } catch (e: any) {
-    console.error("chat error", e);
-    return NextResponse.json(
-      { error: e?.message || "Chat failed" },
-      { status: 500 }
-    );
+    const detail = e?.message || String(e);
+    console.error("chat error", detail, e);
+    return NextResponse.json({ error: detail }, { status: 500 });
   }
 }
