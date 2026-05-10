@@ -1,4 +1,3 @@
-import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import type { Document } from "@langchain/core/documents";
 
 export type Citation = {
@@ -7,15 +6,15 @@ export type Citation = {
   snippet: string;
 };
 
+const CHAT_URL = "https://router.huggingface.co/v1/chat/completions";
+const MODEL = "meta-llama/Llama-3.1-8B-Instruct:nebius";
+
 export async function answerWithContext(
   question: string,
   chunks: Document[]
 ): Promise<{ answer: string; citations: Citation[] }> {
-  const llm = new ChatGoogleGenerativeAI({
-    apiKey: process.env.GOOGLE_API_KEY!,
-    model: "gemini-2.0-flash",
-    temperature: 0.2,
-  });
+  const token = process.env.HF_TOKEN;
+  if (!token) throw new Error("HF_TOKEN env var is not set");
 
   const context = chunks
     .map((c, i) => {
@@ -40,17 +39,32 @@ QUESTION: ${question}
 
 ANSWER:`;
 
-  const res = await llm.invoke([
-    { role: "system", content: system },
-    { role: "user", content: user },
-  ]);
+  const res = await fetch(CHAT_URL, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: MODEL,
+      messages: [
+        { role: "system", content: system },
+        { role: "user", content: user },
+      ],
+      temperature: 0.2,
+      max_tokens: 600,
+    }),
+  });
 
-  const answer =
-    typeof res.content === "string"
-      ? res.content
-      : Array.isArray(res.content)
-      ? res.content.map((p: any) => p.text ?? "").join("")
-      : String(res.content);
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`HF chat failed (${res.status}): ${body.slice(0, 300)}`);
+  }
+
+  const json = (await res.json()) as {
+    choices: { message: { content: string } }[];
+  };
+  const answer = json.choices?.[0]?.message?.content ?? "";
 
   const citations: Citation[] = chunks.map((c) => ({
     page: c.metadata?.loc?.pageNumber ?? c.metadata?.page,
