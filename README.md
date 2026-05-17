@@ -6,8 +6,8 @@ A self-built version of Google NotebookLM. Upload a PDF or text file, then chat 
 
 ## Live demo
 
-🔗 **Live URL:** _add your Vercel URL here after deploy_
-🔗 **Source:** _add your GitHub URL here_
+🔗 **Live URL:** https://notebooklm-rag-9hlp.vercel.app/)
+
 
 ## What it does
 
