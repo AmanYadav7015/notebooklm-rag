@@ -32,19 +32,36 @@ A self-built version of Google NotebookLM. Upload a PDF or text file, then chat 
 
 All providers used have a **free tier**, so the project can run end-to-end at $0.
 
-## RAG pipeline
+## RAG pipeline (CRAG — Corrective RAG)
 
 ```
 upload → load (PDFLoader)
        → chunk (RecursiveCharacterTextSplitter, 1000/200)
-       → embed (Gemini embedding-001)
+       → embed (HF all-MiniLM-L6-v2)
        → store (Qdrant Cloud, tagged with docId)
                        │
 question → embed query │
        → retrieve top-4 chunks (filtered by docId)
-       → prompt LLM with chunks as context
-       → grounded answer + citations
+       → GRADE each chunk for relevance (LLM, 0..1)
+            ├─ max score ≥ 0.7  → use chunks as-is
+            ├─ otherwise        → REWRITE query → retrieve again,
+            │                     merge + rerank by grade, keep ≥ 0.3
+            └─ still nothing    → answer "couldn't find that in the document"
+       → prompt LLM with surviving chunks as context
+       → grounded answer + citations + CRAG trace
 ```
+
+### Why CRAG
+
+Plain RAG always feeds the top-k chunks to the LLM, even when they are weak
+matches — which produces confident answers built on irrelevant context. CRAG
+adds a self-check: a lightweight grader scores each retrieved chunk, and on a
+bad retrieval the system **corrects** itself by rewriting the question into a
+denser search query and trying again. Only chunks that pass the relevance bar
+are sent to the answering LLM, so the final answer is either well-grounded or
+honestly refused. The `/api/chat` response includes a `trace` field with the
+grades, any rewritten query, and the action taken (`use` / `rewrite` /
+`insufficient`).
 
 ### Chunking strategy
 
@@ -72,9 +89,10 @@ components/
   Chat.tsx
 lib/rag/
   load.ts               # PDF / text loader
-  chunk.ts               # Chunking strategy
-  store.ts               # Embeddings + Qdrant store + retrieval
-  answer.ts              # Prompt + LLM call + citations
+  chunk.ts              # Chunking strategy
+  store.ts              # Embeddings + Qdrant store + retrieval
+  crag.ts               # Corrective RAG: grade → rewrite → re-retrieve
+  answer.ts             # Prompt + LLM call + citations
 ```
 
 ## Local setup
